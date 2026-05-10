@@ -1,0 +1,13 @@
+[package]
+name = "agentmem-python"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "agentmem_python"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.21", features = ["extension-module"] }
+agentmem-core = { path = "../../core" }
+uuid = { version = "1", features = ["v4"] }

@@ -1,0 +1,23 @@
+{
+  "name": "agentmem-explorer",
+  "version": "0.1.0",
+  "description": "AgentMem Memory Explorer — CLI and Dashboard",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --hot src/index.tsx",
+    "build": "bun build src/index.tsx --outdir=dist",
+    "cli": "bun run cli/index.ts"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "@grpc/grpc-js": "^1.12.0",
+    "@grpc/proto-loader": "^0.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "bun-types": "latest",
+    "typescript": "^5.8.0"
+  }
+}

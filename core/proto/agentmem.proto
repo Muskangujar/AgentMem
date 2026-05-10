@@ -1,0 +1,79 @@
+syntax = "proto3";
+package agentmem;
+
+// AgentMem gRPC service — remote access to all three memory types.
+// Python SDK's "server" mode connects here; "embedded" mode bypasses this
+// entirely and calls the Rust core in-process via PyO3.
+
+service AgentMemService {
+    // ── Semantic Memory ─────────────────────────────────────────────────
+    rpc Remember (RememberRequest)   returns (RememberResponse);
+
+    // ── Episodic Memory ─────────────────────────────────────────────────
+    rpc LogEpisode  (LogEpisodeRequest)  returns (LogEpisodeResponse);
+    rpc GetEpisodes (GetEpisodesRequest) returns (GetEpisodesResponse);
+
+    // ── Structured Memory ───────────────────────────────────────────────
+    rpc SetKv (SetKvRequest) returns (SetKvResponse);
+    rpc GetKv (GetKvRequest) returns (GetKvResponse);
+}
+
+// ─── Semantic ────────────────────────────────────────────────────────────────
+
+message RememberRequest {
+    string namespace = 1;
+    string text      = 2;
+}
+
+message RememberResponse {
+    uint32 doc_id = 1;
+}
+
+// ─── Episodic ────────────────────────────────────────────────────────────────
+
+message LogEpisodeRequest {
+    string namespace      = 1;
+    string action         = 2;
+    string result_summary = 3;
+}
+
+message LogEpisodeResponse {
+    uint64 timestamp_ns = 1;
+    string action_uuid  = 2;
+}
+
+message GetEpisodesRequest {
+    string namespace = 1;
+    uint32 limit     = 2;
+}
+
+message EpisodeEntry {
+    string action         = 1;
+    string result_summary = 2;
+    uint64 timestamp_ns   = 3;
+    string action_uuid    = 4;
+}
+
+message GetEpisodesResponse {
+    repeated EpisodeEntry episodes = 1;
+}
+
+// ─── Structured KV ──────────────────────────────────────────────────────────
+
+message SetKvRequest {
+    string namespace = 1;
+    string key       = 2;
+    bytes  value     = 3;
+}
+
+message SetKvResponse {}
+
+message GetKvRequest {
+    string namespace = 1;
+    string key       = 2;
+}
+
+message GetKvResponse {
+    bool  found = 1;
+    bytes value = 2;
+}

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "agentmem"
+version = "0.1.0"
+description = "Persistent, queryable memory for AI agents — semantic, episodic, and structured."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "grpcio>=1.60",
+    "grpcio-tools>=1.60",
+    "protobuf>=4.25",
+]
+
+[project.optional-dependencies]
+agentid = ["agentidentity-auth>=0.1.0"]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "agentmem._native"

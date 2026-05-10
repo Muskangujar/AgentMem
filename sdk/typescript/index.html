@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="AgentMem Memory Explorer — browse semantic, episodic, and structured memories across AI agent sessions." />
+    <title>AgentMem Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a2e;
+            --bg-card: rgba(26, 26, 46, 0.6);
+            --border: rgba(255, 255, 255, 0.06);
+            --border-active: rgba(139, 92, 246, 0.4);
+
+            --text-primary: #f0f0f5;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+
+            --accent-purple: #8b5cf6;
+            --accent-blue: #3b82f6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+
+            --gradient-purple: linear-gradient(135deg, #8b5cf6, #6366f1);
+            --gradient-blue: linear-gradient(135deg, #3b82f6, #06b6d4);
+            --gradient-emerald: linear-gradient(135deg, #10b981, #059669);
+
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #root { min-height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module" src="/src/index.tsx"></script>
+</body>
+</html>
