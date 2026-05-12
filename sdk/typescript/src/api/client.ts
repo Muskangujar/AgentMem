@@ -77,62 +77,67 @@ export class AgentMemClient {
     namespace: string,
     text: string
   ): Promise<RememberResponse> {
-    console.log(
-      `[agentmem] remember(namespace=${namespace}, text=${text.slice(0, 50)}...)`
-    );
-    // Placeholder — will use @grpc/grpc-js in production
-    return { doc_id: 0 };
+    const resp = await fetch("/api/remember", {
+      method: "POST",
+      body: JSON.stringify({ namespace, text }),
+      headers: { "Content-Type": "application/json" },
+    });
+    return resp.json();
   }
 
-  /**
-   * Log an episodic event.
-   */
   async logEpisode(
     namespace: string,
     action: string,
     resultSummary: string
   ): Promise<LogEpisodeResponse> {
-    console.log(
-      `[agentmem] logEpisode(namespace=${namespace}, action=${action})`
-    );
-    return {
-      timestamp_ns: Date.now() * 1_000_000,
-      action_uuid: crypto.randomUUID(),
-    };
+    const resp = await fetch("/api/log_episode", {
+      method: "POST",
+      body: JSON.stringify({ namespace, action, result_summary: resultSummary }),
+      headers: { "Content-Type": "application/json" },
+    });
+    return resp.json();
   }
 
-  /**
-   * Retrieve recent episodes.
-   */
   async getEpisodes(
     namespace: string,
     limit: number = 10
   ): Promise<GetEpisodesResponse> {
-    console.log(
-      `[agentmem] getEpisodes(namespace=${namespace}, limit=${limit})`
-    );
-    return { episodes: [] };
+    const resp = await fetch(`/api/get_episodes?namespace=${namespace}&limit=${limit}`);
+    return resp.json();
   }
 
-  /**
-   * Set a structured key-value pair.
-   */
   async setKv(
     namespace: string,
     key: string,
     value: Uint8Array
   ): Promise<void> {
-    console.log(`[agentmem] setKv(namespace=${namespace}, key=${key})`);
+    await fetch("/api/set_kv", {
+      method: "POST",
+      body: JSON.stringify({ namespace, key, value: Array.from(value) }),
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  /**
-   * Get a structured value by key.
-   */
   async getKv(
     namespace: string,
     key: string
   ): Promise<GetKvResponse> {
-    console.log(`[agentmem] getKv(namespace=${namespace}, key=${key})`);
-    return { found: false, value: new Uint8Array() };
+    const resp = await fetch(`/api/get_kv?namespace=${namespace}&key=${key}`);
+    const data = await resp.json();
+    return { ...data, value: new Uint8Array(data.value || []) };
+  }
+
+  // Added missing recall method for the UI
+  async recall(
+    namespace: string,
+    query: string,
+    topK: number = 5
+  ): Promise<any> {
+    const resp = await fetch("/api/recall", {
+      method: "POST",
+      body: JSON.stringify({ namespace, query, top_k: topK }),
+      headers: { "Content-Type": "application/json" },
+    });
+    return resp.json();
   }
 }

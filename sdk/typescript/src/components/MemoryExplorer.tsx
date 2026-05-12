@@ -1,35 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { AgentMemClient } from "../api/client";
 
 interface Props {
   namespace: string;
   serverUrl: string;
 }
 
-// Placeholder data for scaffolding — will be replaced with real gRPC calls
-const SAMPLE_MEMORIES = [
-  {
-    doc_id: 0,
-    text: "User prefers JSON output over CSV",
-    tags: ["preference"],
-    created: "2 min ago",
-  },
-  {
-    doc_id: 1,
-    text: "JTFS with Q=16 gives best EEG results",
-    tags: ["config", "eeg"],
-    created: "5 min ago",
-  },
-  {
-    doc_id: 2,
-    text: "The wavelet scattering transform preserves translation invariance",
-    tags: ["knowledge", "dsp"],
-    created: "1 hour ago",
-  },
-];
-
 export function MemoryExplorer({ namespace, serverUrl }: Props) {
   const [query, setQuery] = useState("");
   const [newMemory, setNewMemory] = useState("");
+  const [memories, setMemories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const client = new AgentMemClient(serverUrl);
+
+  const handleStore = async () => {
+    if (!newMemory) return;
+    setLoading(true);
+    await client.remember(namespace, newMemory);
+    setNewMemory("");
+    // Refresh results if possible (or just wait for next search)
+    setLoading(false);
+  };
+
+  const handleSearch = async () => {
+    if (!query) return;
+    setLoading(true);
+    const results = await client.recall(namespace, query);
+    setMemories(results.results || []);
+    setLoading(false);
+  };
 
   return (
     <div style={styles.container}>
@@ -52,8 +52,8 @@ export function MemoryExplorer({ namespace, serverUrl }: Props) {
             onChange={(e) => setNewMemory(e.target.value)}
             placeholder='mem.remember("User prefers JSON output over CSV")'
           />
-          <button style={styles.button} onClick={() => setNewMemory("")}>
-            Store
+          <button style={styles.button} onClick={handleStore} disabled={loading}>
+            {loading ? "Storing..." : "Store"}
           </button>
         </div>
       </div>
@@ -67,39 +67,33 @@ export function MemoryExplorer({ namespace, serverUrl }: Props) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder='mem.recall("what output format does the user want?")'
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
-          <button style={{ ...styles.button, ...styles.buttonSecondary }}>
-            Search
+          <button style={{ ...styles.button, ...styles.buttonSecondary }} onClick={handleSearch} disabled={loading}>
+            {loading ? "Searching..." : "Search"}
           </button>
         </div>
-        <p style={styles.hint}>
-          ⚠️ Semantic recall requires the HNSW index (Phase 4)
-        </p>
       </div>
 
       {/* ── Memory List ───────────────────────────────────────── */}
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>
-          Stored Memories
-          <span style={styles.count}>{SAMPLE_MEMORIES.length}</span>
+          Search Results
+          <span style={styles.count}>{memories.length}</span>
         </h3>
         <div style={styles.list}>
-          {SAMPLE_MEMORIES.map((mem) => (
-            <div key={mem.doc_id} style={styles.memoryItem}>
+          {memories.map((mem, i) => (
+            <div key={i} style={styles.memoryItem}>
               <div style={styles.memoryHeader}>
                 <span style={styles.docId}>#{mem.doc_id}</span>
-                <span style={styles.timestamp}>{mem.created}</span>
+                <span style={styles.score}>Score: {mem.score.toFixed(4)}</span>
               </div>
               <p style={styles.memoryText}>{mem.text}</p>
-              <div style={styles.tags}>
-                {mem.tags.map((tag) => (
-                  <span key={tag} style={styles.tag}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
             </div>
           ))}
+          {memories.length === 0 && !loading && (
+            <p style={styles.hint}>No results yet. Try searching for something above!</p>
+          )}
         </div>
       </div>
     </div>

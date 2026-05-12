@@ -5,6 +5,10 @@
 #include <stdexcept>
 #include <functional>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 namespace agentmem {
 
 // ── Constants for bge-small-en-v1.5 ─────────────────────────────────────────
@@ -23,8 +27,17 @@ Embedder::Embedder(const std::string& model_path)
 
     if (!stub_mode_) {
         try {
+#ifdef _WIN32
+            // Windows ONNX Runtime requires wide string paths
+            int wlen = MultiByteToWideChar(CP_UTF8, 0, model_path.c_str(), -1, nullptr, 0);
+            std::vector<wchar_t> wpath(wlen);
+            MultiByteToWideChar(CP_UTF8, 0, model_path.c_str(), -1, wpath.data(), wlen);
+            session_ = std::make_unique<Ort::Session>(
+                env_, wpath.data(), session_opts_);
+#else
             session_ = std::make_unique<Ort::Session>(
                 env_, model_path.c_str(), session_opts_);
+#endif
         } catch (const Ort::Exception& e) {
             // Fall back to stub mode if model can't be loaded
             fprintf(stderr, "[agentmem] WARNING: failed to load ONNX model at '%s': %s\n"
