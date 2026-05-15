@@ -1,38 +1,64 @@
 import React, { useState } from "react";
+import { AgentMemClient } from "../api/client";
 
 interface Props {
   namespace: string;
   serverUrl: string;
 }
 
-// Placeholder data — will be replaced with real gRPC calls
-const SAMPLE_KV_PAIRS = [
-  {
-    key: "last_run_config",
-    value: '{"J": 8, "Q": 16, "mode": "jtfs"}',
-    type: "json",
-  },
-  {
-    key: "user_id",
-    value: '"usr_a1b2c3d4e5f6"',
-    type: "string",
-  },
-  {
-    key: "api_endpoint",
-    value: '"https://api.pubmed.ncbi.nlm.nih.gov/v1"',
-    type: "string",
-  },
-  {
-    key: "session_count",
-    value: "42",
-    type: "number",
-  },
-];
-
 export function KvInspector({ namespace, serverUrl }: Props) {
   const [newKey, setNewKey] = useState("");
   const [newValue, setNewValue] = useState("");
   const [lookupKey, setLookupKey] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [pairs, setPairs] = useState<any[]>([]);
+
+  const client = new AgentMemClient(serverUrl);
+
+  const handleSet = async () => {
+    if (!newKey || !newValue) return;
+    setLoading(true);
+    try {
+      const encoder = new TextEncoder();
+      await client.setKv(namespace, newKey, encoder.encode(newValue));
+      setNewKey("");
+      setNewValue("");
+      // Automatically add to list if not present
+      if (!pairs.find(p => p.key === newKey)) {
+        setPairs([{ key: newKey, value: newValue, type: "string" }, ...pairs]);
+      }
+    } catch (e) {
+      console.error("Set KV failed:", e);
+    }
+    setLoading(false);
+  };
+
+  const handleGet = async () => {
+    if (!lookupKey) return;
+    setLoading(true);
+    try {
+      const res = await client.getKv(namespace, lookupKey);
+      if (res.found) {
+        const decoder = new TextDecoder();
+        const valStr = decoder.decode(res.value);
+        
+        // Update or add to list
+        const existing = pairs.findIndex(p => p.key === lookupKey);
+        if (existing !== -1) {
+          const newPairs = [...pairs];
+          newPairs[existing].value = valStr;
+          setPairs(newPairs);
+        } else {
+          setPairs([{ key: lookupKey, value: valStr, type: "string" }, ...pairs]);
+        }
+      } else {
+        alert("Key not found");
+      }
+    } catch (e) {
+      console.error("Get KV failed:", e);
+    }
+    setLoading(false);
+  };
 
   return (
     <div style={styles.container}>
@@ -68,7 +94,9 @@ export function KvInspector({ namespace, serverUrl }: Props) {
               rows={2}
             />
           </div>
-          <button style={styles.button}>Set</button>
+          <button style={styles.button} onClick={handleSet} disabled={loading}>
+            {loading ? "..." : "Set"}
+          </button>
         </div>
       </div>
 
@@ -81,9 +109,10 @@ export function KvInspector({ namespace, serverUrl }: Props) {
             value={lookupKey}
             onChange={(e) => setLookupKey(e.target.value)}
             placeholder="Enter key to look up"
+            onKeyDown={(e) => e.key === 'Enter' && handleGet()}
           />
-          <button style={{ ...styles.button, ...styles.buttonSecondary }}>
-            Get
+          <button style={{ ...styles.button, ...styles.buttonSecondary }} onClick={handleGet} disabled={loading}>
+            {loading ? "..." : "Get"}
           </button>
         </div>
       </div>
@@ -91,42 +120,23 @@ export function KvInspector({ namespace, serverUrl }: Props) {
       {/* ── KV Table ──────────────────────────────────────────── */}
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>
-          Stored Pairs
-          <span style={styles.count}>{SAMPLE_KV_PAIRS.length}</span>
+          Inspected Pairs
+          <span style={styles.count}>{pairs.length}</span>
         </h3>
         <div style={styles.table}>
           <div style={styles.tableHeader}>
             <span style={styles.colKey}>Key</span>
             <span style={styles.colValue}>Value</span>
-            <span style={styles.colType}>Type</span>
           </div>
-          {SAMPLE_KV_PAIRS.map((pair) => (
+          {pairs.map((pair) => (
             <div key={pair.key} style={styles.tableRow}>
               <span style={styles.keyCell}>{pair.key}</span>
               <span style={styles.valueCell}>{pair.value}</span>
-              <span style={styles.typeCell}>
-                <span
-                  style={{
-                    ...styles.typeBadge,
-                    background:
-                      pair.type === "json"
-                        ? "rgba(139, 92, 246, 0.12)"
-                        : pair.type === "string"
-                          ? "rgba(59, 130, 246, 0.12)"
-                          : "rgba(16, 185, 129, 0.12)",
-                    color:
-                      pair.type === "json"
-                        ? "var(--accent-purple)"
-                        : pair.type === "string"
-                          ? "var(--accent-blue)"
-                          : "var(--accent-emerald)",
-                  }}
-                >
-                  {pair.type}
-                </span>
-              </span>
             </div>
           ))}
+          {pairs.length === 0 && (
+            <p style={styles.hint}>No keys inspected yet. Set or Get a value above!</p>
+          )}
         </div>
       </div>
     </div>

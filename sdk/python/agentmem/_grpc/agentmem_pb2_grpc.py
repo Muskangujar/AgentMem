@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import agentmem_pb2 as agentmem__pb2
+from agentmem._grpc import agentmem_pb2 as agentmem__pb2
 
 GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
@@ -43,6 +43,11 @@ class AgentMemServiceStub(object):
                 request_serializer=agentmem__pb2.RememberRequest.SerializeToString,
                 response_deserializer=agentmem__pb2.RememberResponse.FromString,
                 _registered_method=True)
+        self.Recall = channel.unary_unary(
+                '/agentmem.AgentMemService/Recall',
+                request_serializer=agentmem__pb2.RecallRequest.SerializeToString,
+                response_deserializer=agentmem__pb2.RecallResponse.FromString,
+                _registered_method=True)
         self.LogEpisode = channel.unary_unary(
                 '/agentmem.AgentMemService/LogEpisode',
                 request_serializer=agentmem__pb2.LogEpisodeRequest.SerializeToString,
@@ -75,6 +80,12 @@ class AgentMemServiceServicer(object):
     def Remember(self, request, context):
         """── Semantic Memory ─────────────────────────────────────────────────
         """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Recall(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -112,6 +123,11 @@ def add_AgentMemServiceServicer_to_server(servicer, server):
                     servicer.Remember,
                     request_deserializer=agentmem__pb2.RememberRequest.FromString,
                     response_serializer=agentmem__pb2.RememberResponse.SerializeToString,
+            ),
+            'Recall': grpc.unary_unary_rpc_method_handler(
+                    servicer.Recall,
+                    request_deserializer=agentmem__pb2.RecallRequest.FromString,
+                    response_serializer=agentmem__pb2.RecallResponse.SerializeToString,
             ),
             'LogEpisode': grpc.unary_unary_rpc_method_handler(
                     servicer.LogEpisode,
@@ -165,6 +181,33 @@ class AgentMemService(object):
             '/agentmem.AgentMemService/Remember',
             agentmem__pb2.RememberRequest.SerializeToString,
             agentmem__pb2.RememberResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Recall(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/agentmem.AgentMemService/Recall',
+            agentmem__pb2.RecallRequest.SerializeToString,
+            agentmem__pb2.RecallResponse.FromString,
             options,
             channel_credentials,
             insecure,

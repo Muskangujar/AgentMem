@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x61gentmem.proto\x12\x08\x61gentmem\"2\n\x0fRememberRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\"\"\n\x10RememberResponse\x12\x0e\n\x06\x64oc_id\x18\x01 \x01(\r\"N\n\x11LogEpisodeRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0e\n\x06\x61\x63tion\x18\x02 \x01(\t\x12\x16\n\x0eresult_summary\x18\x03 \x01(\t\"?\n\x12LogEpisodeResponse\x12\x14\n\x0ctimestamp_ns\x18\x01 \x01(\x04\x12\x13\n\x0b\x61\x63tion_uuid\x18\x02 \x01(\t\"6\n\x12GetEpisodesRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\r\n\x05limit\x18\x02 \x01(\r\"a\n\x0c\x45pisodeEntry\x12\x0e\n\x06\x61\x63tion\x18\x01 \x01(\t\x12\x16\n\x0eresult_summary\x18\x02 \x01(\t\x12\x14\n\x0ctimestamp_ns\x18\x03 \x01(\x04\x12\x13\n\x0b\x61\x63tion_uuid\x18\x04 \x01(\t\"?\n\x13GetEpisodesResponse\x12(\n\x08\x65pisodes\x18\x01 \x03(\x0b\x32\x16.agentmem.EpisodeEntry\"=\n\x0cSetKvRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\x12\r\n\x05value\x18\x03 \x01(\x0c\"\x0f\n\rSetKvResponse\".\n\x0cGetKvRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\"-\n\rGetKvResponse\x12\r\n\x05\x66ound\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c\x32\xdd\x02\n\x0f\x41gentMemService\x12\x41\n\x08Remember\x12\x19.agentmem.RememberRequest\x1a\x1a.agentmem.RememberResponse\x12G\n\nLogEpisode\x12\x1b.agentmem.LogEpisodeRequest\x1a\x1c.agentmem.LogEpisodeResponse\x12J\n\x0bGetEpisodes\x12\x1c.agentmem.GetEpisodesRequest\x1a\x1d.agentmem.GetEpisodesResponse\x12\x38\n\x05SetKv\x12\x16.agentmem.SetKvRequest\x1a\x17.agentmem.SetKvResponse\x12\x38\n\x05GetKv\x12\x16.agentmem.GetKvRequest\x1a\x17.agentmem.GetKvResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x61gentmem.proto\x12\x08\x61gentmem\"2\n\x0fRememberRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\"\"\n\x10RememberResponse\x12\x0e\n\x06\x64oc_id\x18\x01 \x01(\r\"@\n\rRecallRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\r\n\x05query\x18\x02 \x01(\t\x12\r\n\x05top_k\x18\x03 \x01(\r\";\n\x0cRecallResult\x12\x0e\n\x06\x64oc_id\x18\x01 \x01(\r\x12\x0c\n\x04text\x18\x02 \x01(\t\x12\r\n\x05score\x18\x03 \x01(\x02\"9\n\x0eRecallResponse\x12\'\n\x07results\x18\x01 \x03(\x0b\x32\x16.agentmem.RecallResult\"N\n\x11LogEpisodeRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0e\n\x06\x61\x63tion\x18\x02 \x01(\t\x12\x16\n\x0eresult_summary\x18\x03 \x01(\t\"?\n\x12LogEpisodeResponse\x12\x14\n\x0ctimestamp_ns\x18\x01 \x01(\x04\x12\x13\n\x0b\x61\x63tion_uuid\x18\x02 \x01(\t\"6\n\x12GetEpisodesRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\r\n\x05limit\x18\x02 \x01(\r\"a\n\x0c\x45pisodeEntry\x12\x0e\n\x06\x61\x63tion\x18\x01 \x01(\t\x12\x16\n\x0eresult_summary\x18\x02 \x01(\t\x12\x14\n\x0ctimestamp_ns\x18\x03 \x01(\x04\x12\x13\n\x0b\x61\x63tion_uuid\x18\x04 \x01(\t\"?\n\x13GetEpisodesResponse\x12(\n\x08\x65pisodes\x18\x01 \x03(\x0b\x32\x16.agentmem.EpisodeEntry\"=\n\x0cSetKvRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\x12\r\n\x05value\x18\x03 \x01(\x0c\"\x0f\n\rSetKvResponse\".\n\x0cGetKvRequest\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\"-\n\rGetKvResponse\x12\r\n\x05\x66ound\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c\x32\x9a\x03\n\x0f\x41gentMemService\x12\x41\n\x08Remember\x12\x19.agentmem.RememberRequest\x1a\x1a.agentmem.RememberResponse\x12;\n\x06Recall\x12\x17.agentmem.RecallRequest\x1a\x18.agentmem.RecallResponse\x12G\n\nLogEpisode\x12\x1b.agentmem.LogEpisodeRequest\x1a\x1c.agentmem.LogEpisodeResponse\x12J\n\x0bGetEpisodes\x12\x1c.agentmem.GetEpisodesRequest\x1a\x1d.agentmem.GetEpisodesResponse\x12\x38\n\x05SetKv\x12\x16.agentmem.SetKvRequest\x1a\x17.agentmem.SetKvResponse\x12\x38\n\x05GetKv\x12\x16.agentmem.GetKvRequest\x1a\x17.agentmem.GetKvResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,24 +35,30 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_REMEMBERREQUEST']._serialized_end=78
   _globals['_REMEMBERRESPONSE']._serialized_start=80
   _globals['_REMEMBERRESPONSE']._serialized_end=114
-  _globals['_LOGEPISODEREQUEST']._serialized_start=116
-  _globals['_LOGEPISODEREQUEST']._serialized_end=194
-  _globals['_LOGEPISODERESPONSE']._serialized_start=196
-  _globals['_LOGEPISODERESPONSE']._serialized_end=259
-  _globals['_GETEPISODESREQUEST']._serialized_start=261
-  _globals['_GETEPISODESREQUEST']._serialized_end=315
-  _globals['_EPISODEENTRY']._serialized_start=317
-  _globals['_EPISODEENTRY']._serialized_end=414
-  _globals['_GETEPISODESRESPONSE']._serialized_start=416
-  _globals['_GETEPISODESRESPONSE']._serialized_end=479
-  _globals['_SETKVREQUEST']._serialized_start=481
-  _globals['_SETKVREQUEST']._serialized_end=542
-  _globals['_SETKVRESPONSE']._serialized_start=544
-  _globals['_SETKVRESPONSE']._serialized_end=559
-  _globals['_GETKVREQUEST']._serialized_start=561
-  _globals['_GETKVREQUEST']._serialized_end=607
-  _globals['_GETKVRESPONSE']._serialized_start=609
-  _globals['_GETKVRESPONSE']._serialized_end=654
-  _globals['_AGENTMEMSERVICE']._serialized_start=657
-  _globals['_AGENTMEMSERVICE']._serialized_end=1006
+  _globals['_RECALLREQUEST']._serialized_start=116
+  _globals['_RECALLREQUEST']._serialized_end=180
+  _globals['_RECALLRESULT']._serialized_start=182
+  _globals['_RECALLRESULT']._serialized_end=241
+  _globals['_RECALLRESPONSE']._serialized_start=243
+  _globals['_RECALLRESPONSE']._serialized_end=300
+  _globals['_LOGEPISODEREQUEST']._serialized_start=302
+  _globals['_LOGEPISODEREQUEST']._serialized_end=380
+  _globals['_LOGEPISODERESPONSE']._serialized_start=382
+  _globals['_LOGEPISODERESPONSE']._serialized_end=445
+  _globals['_GETEPISODESREQUEST']._serialized_start=447
+  _globals['_GETEPISODESREQUEST']._serialized_end=501
+  _globals['_EPISODEENTRY']._serialized_start=503
+  _globals['_EPISODEENTRY']._serialized_end=600
+  _globals['_GETEPISODESRESPONSE']._serialized_start=602
+  _globals['_GETEPISODESRESPONSE']._serialized_end=665
+  _globals['_SETKVREQUEST']._serialized_start=667
+  _globals['_SETKVREQUEST']._serialized_end=728
+  _globals['_SETKVRESPONSE']._serialized_start=730
+  _globals['_SETKVRESPONSE']._serialized_end=745
+  _globals['_GETKVREQUEST']._serialized_start=747
+  _globals['_GETKVREQUEST']._serialized_end=793
+  _globals['_GETKVRESPONSE']._serialized_start=795
+  _globals['_GETKVRESPONSE']._serialized_end=840
+  _globals['_AGENTMEMSERVICE']._serialized_start=843
+  _globals['_AGENTMEMSERVICE']._serialized_end=1253
 # @@protoc_insertion_point(module_scope)

@@ -165,11 +165,9 @@ class Memory:
             is not yet available.  ``remember()`` works now — it embeds
             and persists.
         """
-        raise NotImplementedError(
-            "Semantic recall requires the HNSW index (Phase 4). "
-            "remember() works now — memories are being embedded and persisted. "
-            "recall() will be available once the vector index is wired."
-        )
+        if self._mode == "embedded":
+            return self._recall_embedded(query, top_k=top_k)
+        return self._recall_server(query, top_k=top_k)
 
     # ── Episodic Memory ──────────────────────────────────────────────
 
@@ -272,6 +270,11 @@ class Memory:
 
         return native_remember(self._db_path, self._namespace, text)
 
+    def _recall_embedded(self, query: str, *, top_k: int = 5) -> List[str]:
+        from agentmem._native import native_recall  # type: ignore[import]
+
+        return native_recall(self._db_path, self._namespace, query, top_k)
+
     def _log_episode_embedded(self, action: str, result_summary: str, *, tags=None) -> dict:
         from agentmem._native import native_log_episode  # type: ignore[import]
 
@@ -318,6 +321,17 @@ class Memory:
             agentmem_pb2.RememberRequest(namespace=self._namespace, text=text)
         )
         return resp.doc_id
+
+    def _recall_server(self, query: str, *, top_k: int = 5) -> List[str]:
+        from agentmem._grpc import agentmem_pb2
+
+        stub = self._get_stub()
+        resp = stub.Recall(
+            agentmem_pb2.RecallRequest(
+                namespace=self._namespace, query=query, top_k=top_k
+            )
+        )
+        return [r.text for r in resp.results]
 
     def _log_episode_server(self, action: str, result_summary: str, *, tags=None) -> dict:
         from agentmem._grpc import agentmem_pb2

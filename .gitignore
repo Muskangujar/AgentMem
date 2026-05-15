@@ -1,6 +1,5 @@
 .DS_Store
 *.tgz
-onnxruntime_mac/
 target/
 node_modules/
 .venv/
@@ -11,3 +10,10 @@ __pycache__/
 .idea/
 .vscode/
 .claude/
+
+# AgentMem Data & Binaries
+data/
+deps/
+core/target/
+sdk/typescript/node_modules/
+sdk/typescript/dist/

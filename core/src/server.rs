@@ -27,8 +27,8 @@ pub mod proto {
 use proto::agent_mem_service_server::{AgentMemService, AgentMemServiceServer};
 use proto::{
     EpisodeEntry, GetEpisodesRequest, GetEpisodesResponse, GetKvRequest, GetKvResponse,
-    LogEpisodeRequest, LogEpisodeResponse, RememberRequest, RememberResponse, SetKvRequest,
-    SetKvResponse,
+    LogEpisodeRequest, LogEpisodeResponse, RecallRequest, RecallResponse, RecallResult,
+    RememberRequest, RememberResponse, SetKvRequest, SetKvResponse,
 };
 
 /// The core gRPC server struct.
@@ -72,6 +72,31 @@ impl AgentMemService for AgentMemServer {
             .map_err(|e| Status::internal(format!("remember failed: {e:?}")))?;
 
         Ok(Response::new(RememberResponse { doc_id }))
+    }
+
+    async fn recall(
+        &self,
+        request: Request<RecallRequest>,
+    ) -> Result<Response<RecallResponse>, Status> {
+        let r = request.into_inner();
+        let top_k = if r.top_k == 0 { 5 } else { r.top_k as usize };
+
+        let sem = SemanticMemory::new(&self.embedder, &self.storage, &self.index);
+
+        let results = sem
+            .recall(&r.namespace, &r.query, top_k)
+            .map_err(|e| Status::internal(format!("recall failed: {e:?}")))?;
+
+        let results: Vec<RecallResult> = results
+            .into_iter()
+            .map(|(doc_id, text, score)| RecallResult {
+                doc_id,
+                text,
+                score,
+            })
+            .collect();
+
+        Ok(Response::new(RecallResponse { results }))
     }
 
     // ── Episodic Memory ─────────────────────────────────────────────────
