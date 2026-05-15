@@ -4,7 +4,7 @@
   "description": "AgentMem Memory Explorer — CLI and Dashboard",
   "type": "module",
   "scripts": {
-    "dev": "bun run --hot src/index.tsx",
+    "dev": "bun run proxy_server.ts & vite",
     "build": "bun build src/index.tsx --outdir=dist",
     "cli": "bun run cli/index.ts"
   },

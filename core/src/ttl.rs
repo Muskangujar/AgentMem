@@ -3,6 +3,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use rocksdb::{IteratorMode, WriteBatch};
 
+use crate::error::AgentMemError;
 use crate::storage::{AgentStorage, CfName};
 
 pub struct TtlConfig {
@@ -38,7 +39,7 @@ pub fn spawn_episodic_evictor(
 
 /// Scans all episodic entries and deletes those whose timestamp is before `cutoff_ns`.
 /// Caps at 10 000 deletes per call to bound peak memory. Returns the number evicted.
-pub fn evict_once(storage: &AgentStorage, cutoff_ns: u64) -> Result<usize, rocksdb::Error> {
+pub fn evict_once(storage: &AgentStorage, cutoff_ns: u64) -> Result<usize, AgentMemError> {
     let cf = storage.cf(CfName::Episodic);
     let iter = storage.db.iterator_cf(cf, IteratorMode::Start);
 

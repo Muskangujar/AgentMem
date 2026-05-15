@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rust/cxx.h"
+#include "cpp/tokenizer.h"
 #include <memory>
 #include <mutex>
 #include <string>
@@ -17,7 +18,10 @@ namespace agentmem {
 class Embedder {
 public:
     /// If `model_path` is empty, falls back to deterministic stub output
-    /// (for testing without a model file). Otherwise loads the ONNX model.
+    /// (for testing without a model file). Otherwise loads the ONNX model
+    /// and tries to load vocab.txt from the same directory for real WordPiece
+    /// tokenization; falls back to FNV-1a hash tokenization if vocab.txt
+    /// is absent.
     explicit Embedder(const std::string& model_path);
     ~Embedder() = default;
 
@@ -28,14 +32,14 @@ private:
     Ort::Env env_;
     Ort::SessionOptions session_opts_;
     std::unique_ptr<Ort::Session> session_;
-    mutable std::mutex mu_;  // guards session_->Run()
+    mutable std::mutex mu_;        // guards session_->Run()
+    WordPieceTokenizer tokenizer_; // real BERT tokenizer; loaded from vocab.txt
     size_t dim_;
     bool stub_mode_;
 
-    // Simple whitespace tokenizer for stub/basic mode.
-    // Real bge-small-en-v1.5 uses a WordPiece tokenizer; for production
-    // we generate pseudo-token IDs via hash-based projection, which is
-    // sufficient for the ONNX model's embedding quality.
+    /// Tokenize text into BERT token IDs.
+    /// Uses the real WordPiece tokenizer when vocab.txt was successfully loaded;
+    /// otherwise falls back to FNV-1a hash projection into [1, 30000).
     std::vector<int64_t> tokenize(const std::string& text) const;
 };
 

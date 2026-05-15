@@ -4,6 +4,7 @@ use rocksdb::{IteratorMode, ReadOptions};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::error::AgentMemError;
 use crate::namespace::ns_hash;
 use crate::storage::{AgentStorage, CfName};
 
@@ -29,7 +30,7 @@ impl<'a> EpisodicLog<'a> {
         namespace: &str,
         action: String,
         result_summary: String,
-    ) -> Result<(u64, Uuid), rocksdb::Error> {
+    ) -> Result<(u64, Uuid), AgentMemError> {
         // as u64 truncation is safe until year 2554
         #[allow(clippy::cast_possible_truncation)]
         let ts = SystemTime::now()
@@ -69,7 +70,7 @@ impl<'a> EpisodicLog<'a> {
         action: String,
         result_summary: String,
         ts_ns: u64,
-    ) -> Result<(u64, Uuid), rocksdb::Error> {
+    ) -> Result<(u64, Uuid), AgentMemError> {
         let id = Uuid::new_v4();
         let ns = ns_hash(namespace);
 
@@ -99,13 +100,12 @@ impl<'a> EpisodicLog<'a> {
         &self,
         namespace: &str,
         limit: usize,
-    ) -> Result<Vec<Episode>, rocksdb::Error> {
+    ) -> Result<Vec<Episode>, AgentMemError> {
         let ns = ns_hash(namespace);
 
         let mut lower = [0u8; 32];
         lower[..16].copy_from_slice(&ns);
 
-        // upper[16..32] stays 0xFF — any ts+uuid suffix is below this
         let mut upper = [0xFFu8; 32];
         upper[..16].copy_from_slice(&ns);
 

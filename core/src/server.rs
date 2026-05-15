@@ -64,13 +64,8 @@ impl AgentMemService for AgentMemServer {
         request: Request<RememberRequest>,
     ) -> Result<Response<RememberResponse>, Status> {
         let r = request.into_inner();
-
         let sem = SemanticMemory::new(&self.embedder, &self.storage, &self.index);
-
-        let doc_id = sem
-            .remember(&r.namespace, &r.text)
-            .map_err(|e| Status::internal(format!("remember failed: {e:?}")))?;
-
+        let doc_id = sem.remember(&r.namespace, &r.text).map_err(Status::from)?;
         Ok(Response::new(RememberResponse { doc_id }))
     }
 
@@ -80,22 +75,12 @@ impl AgentMemService for AgentMemServer {
     ) -> Result<Response<RecallResponse>, Status> {
         let r = request.into_inner();
         let top_k = if r.top_k == 0 { 5 } else { r.top_k as usize };
-
         let sem = SemanticMemory::new(&self.embedder, &self.storage, &self.index);
-
-        let results = sem
-            .recall(&r.namespace, &r.query, top_k)
-            .map_err(|e| Status::internal(format!("recall failed: {e:?}")))?;
-
+        let results = sem.recall(&r.namespace, &r.query, top_k).map_err(Status::from)?;
         let results: Vec<RecallResult> = results
             .into_iter()
-            .map(|(doc_id, text, score)| RecallResult {
-                doc_id,
-                text,
-                score,
-            })
+            .map(|(doc_id, text, score)| RecallResult { doc_id, text, score })
             .collect();
-
         Ok(Response::new(RecallResponse { results }))
     }
 
@@ -106,12 +91,10 @@ impl AgentMemService for AgentMemServer {
         request: Request<LogEpisodeRequest>,
     ) -> Result<Response<LogEpisodeResponse>, Status> {
         let r = request.into_inner();
-
         let log = EpisodicLog::new(&self.storage);
         let (timestamp_ns, uuid) = log
             .log_episode(&r.namespace, r.action, r.result_summary)
-            .map_err(|e| Status::internal(format!("log_episode failed: {e}")))?;
-
+            .map_err(Status::from)?;
         Ok(Response::new(LogEpisodeResponse {
             timestamp_ns,
             action_uuid: uuid.to_string(),
@@ -123,12 +106,10 @@ impl AgentMemService for AgentMemServer {
         request: Request<GetEpisodesRequest>,
     ) -> Result<Response<GetEpisodesResponse>, Status> {
         let r = request.into_inner();
-
         let log = EpisodicLog::new(&self.storage);
         let episodes = log
             .get_episodes(&r.namespace, r.limit as usize)
-            .map_err(|e| Status::internal(format!("get_episodes failed: {e}")))?;
-
+            .map_err(Status::from)?;
         let entries: Vec<EpisodeEntry> = episodes
             .into_iter()
             .map(|ep| EpisodeEntry {
@@ -138,7 +119,6 @@ impl AgentMemService for AgentMemServer {
                 action_uuid: Uuid::from_bytes(ep.action_uuid).to_string(),
             })
             .collect();
-
         Ok(Response::new(GetEpisodesResponse { episodes: entries }))
     }
 
@@ -149,11 +129,8 @@ impl AgentMemService for AgentMemServer {
         request: Request<SetKvRequest>,
     ) -> Result<Response<SetKvResponse>, Status> {
         let r = request.into_inner();
-
         let kv = StructuredKv::new(&self.storage);
-        kv.set_kv(&r.namespace, &r.key, r.value)
-            .map_err(|e| Status::internal(format!("set_kv failed: {e}")))?;
-
+        kv.set_kv(&r.namespace, &r.key, r.value).map_err(Status::from)?;
         Ok(Response::new(SetKvResponse {}))
     }
 
@@ -162,12 +139,8 @@ impl AgentMemService for AgentMemServer {
         request: Request<GetKvRequest>,
     ) -> Result<Response<GetKvResponse>, Status> {
         let r = request.into_inner();
-
         let kv = StructuredKv::new(&self.storage);
-        let result = kv
-            .get_kv(&r.namespace, &r.key)
-            .map_err(|e| Status::internal(format!("get_kv failed: {e}")))?;
-
+        let result = kv.get_kv(&r.namespace, &r.key).map_err(Status::from)?;
         match result {
             Some(value) => Ok(Response::new(GetKvResponse { found: true, value })),
             None => Ok(Response::new(GetKvResponse {
@@ -179,14 +152,6 @@ impl AgentMemService for AgentMemServer {
 }
 
 /// Start the gRPC server on the given address.
-///
-/// # Example
-/// ```ignore
-/// let embedder = AgentMemEmbedder::new("");
-/// let storage = AgentStorage::open("/tmp/agentmem_db").unwrap();
-/// let index = HnswIndex::new();
-/// serve("0.0.0.0:50051", embedder, storage, index).await.unwrap();
-/// ```
 pub async fn serve(
     addr: &str,
     embedder: AgentMemEmbedder,
