@@ -1,12 +1,14 @@
 use rocksdb::{ColumnFamily, ColumnFamilyDescriptor, Options, DB};
 use std::sync::Arc;
 
+use crate::error::AgentMemError;
+
 pub struct AgentStorage {
     pub(crate) db: Arc<DB>,
 }
 
 impl AgentStorage {
-    pub fn open(path: impl AsRef<std::path::Path>) -> Result<Self, rocksdb::Error> {
+    pub fn open(path: impl AsRef<std::path::Path>) -> Result<Self, AgentMemError> {
         let mut opts = Options::default();
         opts.create_if_missing(true);
         opts.create_missing_column_families(true);
@@ -33,7 +35,7 @@ pub(crate) enum CfName {
     Episodic,
     Structured,
     SemanticMeta,
-    /// "default" CF used for counters and metadata (Phase 3+).
+    /// "default" CF used for counters and metadata.
     Default,
 }
 

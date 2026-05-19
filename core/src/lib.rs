@@ -1,9 +1,9 @@
 #![allow(clippy::needless_lifetimes)] // cxx-generated code
 #![deny(unsafe_op_in_unsafe_fn)]
-// Ratcheted down from pedantic+nursery: generated 28 errors (>20 threshold). (TODO(phase4): revisit)
 #![warn(clippy::all)]
 
 pub mod episodic;
+pub mod error;
 mod namespace;
 pub mod semantic;
 pub mod server;
@@ -12,7 +12,8 @@ pub mod structured;
 pub mod ttl;
 
 pub use episodic::{Episode, EpisodicLog};
-pub use semantic::{HnswIndex, SemanticError, SemanticMemory, SemanticRecord};
+pub use error::AgentMemError;
+pub use semantic::{HnswIndex, SemanticMemory, SemanticRecord};
 pub use storage::AgentStorage;
 pub use structured::StructuredKv;
 pub use ttl::{spawn_episodic_evictor, TtlConfig};
@@ -35,13 +36,11 @@ mod ffi {
 
 // SAFETY: AgentMemEmbedder is Send + Sync — the underlying C++ Embedder
 // serializes inference calls internally via a std::mutex on session_.Run().
-// This is safe for tonic's multi-threaded Tokio runtime.
 pub struct AgentMemEmbedder {
     inner: cxx::UniquePtr<ffi::Embedder>,
 }
 
-// SAFETY: The C++ Embedder now guards session_.Run() with a std::mutex,
-// making concurrent calls from multiple threads safe.
+// SAFETY: The C++ Embedder guards session_.Run() with a std::mutex.
 unsafe impl Send for AgentMemEmbedder {}
 unsafe impl Sync for AgentMemEmbedder {}
 
@@ -58,15 +57,12 @@ impl AgentMemEmbedder {
         }
     }
 
-    /// Returns the embedding dimension (384 for bge-small-en-v1.5).
     pub fn dim(&self) -> usize {
         self.inner.dim()
     }
 
     /// Embeds `text` into a fixed-dim float vector.
-    /// Returns a freshly-allocated Vec; a future `embed_into(&mut [f32])`
-    /// API will allow the caller to reuse buffers when this matters.
-    pub fn embed_text(&self, text: &str) -> Result<Vec<f32>, cxx::Exception> {
+    pub fn embed_text(&self, text: &str) -> Result<Vec<f32>, AgentMemError> {
         let d = self.inner.dim();
         let mut buf = vec![0.0f32; d];
         self.inner.embed(text, &mut buf)?;

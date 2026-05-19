@@ -17,3 +17,5 @@ deps/
 core/target/
 sdk/typescript/node_modules/
 sdk/typescript/dist/
+EXECUTION_PLAN_DEV_A.md
+models/

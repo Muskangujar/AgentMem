@@ -1,3 +1,4 @@
+use crate::error::AgentMemError;
 use crate::namespace::ns_hash;
 use crate::storage::{AgentStorage, CfName};
 
@@ -10,18 +11,29 @@ impl<'a> StructuredKv<'a> {
         Self { storage }
     }
 
-    pub fn set_kv(&self, namespace: &str, key: &str, value: Vec<u8>) -> Result<(), rocksdb::Error> {
+    pub fn set_kv(
+        &self,
+        namespace: &str,
+        key: &str,
+        value: Vec<u8>,
+    ) -> Result<(), AgentMemError> {
         let full = self.full_key(namespace, key);
         self.storage
             .db
             .put_cf(self.storage.cf(CfName::Structured), full, value)
+            .map_err(AgentMemError::from)
     }
 
-    pub fn get_kv(&self, namespace: &str, key: &str) -> Result<Option<Vec<u8>>, rocksdb::Error> {
+    pub fn get_kv(
+        &self,
+        namespace: &str,
+        key: &str,
+    ) -> Result<Option<Vec<u8>>, AgentMemError> {
         let full = self.full_key(namespace, key);
         self.storage
             .db
             .get_cf(self.storage.cf(CfName::Structured), full)
+            .map_err(AgentMemError::from)
     }
 
     fn full_key(&self, namespace: &str, key: &str) -> Vec<u8> {

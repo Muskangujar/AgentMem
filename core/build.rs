@@ -58,6 +58,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=cpp/embedder.h");
     println!("cargo:rerun-if-changed=cpp/embedder.cpp");
+    println!("cargo:rerun-if-changed=cpp/tokenizer.h");
     println!("cargo:rerun-if-env-changed=ORT_LIB_DIR");
     println!("cargo:rerun-if-env-changed=ORT_INCLUDE_DIR");
 
